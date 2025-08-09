@@ -1,22 +1,76 @@
-//V11
+//V12 - Fruit Wheel with Table Control
 <!doctype html>
 <html>
 <head>
 <meta charset="utf-8" />
-<title>8-Segment Controlled Spinning Wheel (Perfect Accuracy)</title>
+<title>Fruit Spinning Wheel</title>
 <style>
   :root { --size: 360px; }
   body { 
     height:100vh; 
-    display:flex; 
-    align-items:center; 
-    justify-content:center; 
-    flex-direction:column; 
-    gap:18px; 
+    margin: 0;
+    padding: 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     font-family:system-ui,Segoe UI,Roboto,Arial; 
     color: white;
+    box-sizing: border-box;
   }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .nav-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  
+  .nav-tab {
+    flex: 1;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  
+  .nav-tab.active {
+    background: rgba(255,255,255,0.3);
+  }
+  
+  .nav-tab:hover:not(.active):not(:disabled) {
+    background: rgba(255,255,255,0.2);
+  }
+  
+  .nav-tab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .page {
+    display: none;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .page.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  
   .wheel-wrap { 
     position: relative; 
     width: var(--size); 
@@ -63,34 +117,33 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     cursor: pointer;
   }
-  .controls { 
-    display:flex; 
-    gap:10px; 
-    flex-wrap:wrap; 
-    justify-content:center; 
-    max-width: 600px;
-  }
-  button { 
-    padding:10px 16px; 
-    border-radius:8px; 
-    border:2px solid rgba(255,255,255,0.3); 
+  
+  .start-button {
+    padding: 15px 30px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.3);
     background: rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
-    cursor:pointer; 
+    cursor: pointer;
     color: white;
     font-weight: 600;
+    font-size: 18px;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   }
-  button:hover:not(:disabled) {
+  
+  .start-button:hover:not(:disabled) {
     background: rgba(255,255,255,0.2);
     border-color: rgba(255,255,255,0.5);
     transform: translateY(-2px);
   }
-  button:disabled { 
-    opacity:.5; 
-    cursor:default; 
+  
+  .start-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
     transform: none;
   }
+  
   #message { 
     color:#fff; 
     font-size: 18px;
@@ -99,6 +152,7 @@
     min-height: 25px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
+  
   .segment-labels {
     position: absolute;
     width: 100%;
@@ -117,6 +171,84 @@
     text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
     transform-origin: center;
   }
+  
+  /* Table Page Styles */
+  .table-container {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    max-width: 600px;
+    width: 100%;
+  }
+  
+  .table-title {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .fruit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .fruit-table th,
+  .fruit-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  .fruit-table th {
+    background: rgba(255,255,255,0.2);
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  
+  .fruit-table td {
+    background: rgba(255,255,255,0.05);
+    color: white;
+  }
+  
+  .fruit-table tr:hover td {
+    background: rgba(255,255,255,0.1);
+  }
+  
+  .color-sample {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .checkbox-cell {
+    text-align: center;
+    width: 80px;
+  }
+  
+  .fruit-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #4361ee;
+  }
+  
+  .selection-info {
+    text-align: center;
+    color: rgba(255,255,255,0.8);
+    font-style: italic;
+    margin-top: 10px;
+  }
+  
   .debug {
     position: fixed;
     top: 10px;
@@ -134,26 +266,63 @@
 </head>
 <body>
 
-<div class="wheel-wrap">
-  <div class="pointer" aria-hidden="true"></div>
-  <div id="wheel" class="wheel" role="img" aria-label="Prize wheel"></div>
-  <div class="segment-labels" id="segmentLabels"></div>
-  <div class="center" id="centerLabel">SPIN</div>
+<div class="container">
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-wheel" onclick="switchPage('wheel')">🎡 Spin Wheel</button>
+    <button class="nav-tab" id="tab-table" onclick="switchPage('table')">🍎 Fruit Table</button>
+  </div>
+  
+  <!-- Page 1: Spin Wheel -->
+  <div class="page active" id="page-wheel">
+    <div class="wheel-wrap">
+      <div class="pointer" aria-hidden="true"></div>
+      <div id="wheel" class="wheel" role="img" aria-label="Fruit wheel"></div>
+      <div class="segment-labels" id="segmentLabels"></div>
+      <div class="center" id="centerLabel">SPIN</div>
+    </div>
+    
+    <button class="start-button" id="startButton" onclick="startSpin()">🚀 Start Spin</button>
+    <div id="message">Select a fruit in the table, then start spinning!</div>
+  </div>
+  
+  <!-- Page 2: Fruit Table -->
+  <div class="page" id="page-table">
+    <div class="table-container">
+      <h2 class="table-title">🍎 Fruit Selection</h2>
+      <table class="fruit-table">
+        <thead>
+          <tr>
+            <th class="checkbox-cell">Select</th>
+            <th>Fruit</th>
+            <th>Color</th>
+          </tr>
+        </thead>
+        <tbody id="fruitTableBody">
+        </tbody>
+      </table>
+      <div class="selection-info" id="selectionInfo">
+        Select one fruit to spin to
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="controls" id="buttons"></div>
-<div id="message">Click any button to spin to that color!</div>
 <div id="debug" class="debug"></div>
 
 <script>
 // === CONFIG ===
 const colors = ['#e63946','#f77f00','#ffbe0b','#8ac926','#2ec4b6','#4361ee','#9d4edd','#ff6fbf'];
-const names  = ['Red','Orange','Yellow','Green','Cyan','Blue','Purple','Pink'];
+const fruitNames = ['Apple','Orange','Banana','Lime','Mint','Blueberry','Grape','Strawberry'];
 const segments = colors.length;
 const segmentAngle = 360 / segments; // 45 degrees per segment
 
-// Build the wheel - each segment starts at index * 45 degrees
-// Segment 0 (Red): 0° to 45°, Segment 1 (Orange): 45° to 90°, etc.
+let currentPage = 'wheel';
+let selectedFruitIndex = 0; // Default to first fruit
+let currentRotation = 0;
+let spinning = false;
+
+// Build the wheel
 const stops = [];
 for (let i = 0; i < segments; i++){
   const start = i * segmentAngle;
@@ -164,174 +333,219 @@ for (let i = 0; i < segments; i++){
 const wheel = document.getElementById('wheel');
 wheel.style.background = `conic-gradient(from 0deg, ${stops.join(', ')})`;
 
-// Add segment labels
-const segmentLabels = document.getElementById('segmentLabels');
-for (let i = 0; i < segments; i++) {
-  const label = document.createElement('div');
-  label.className = 'segment-label';
-  label.textContent = names[i];
-  
-  // Position label at the center of each segment
-  const centerAngle = i * segmentAngle + segmentAngle / 2;
-  const angleRad = (centerAngle - 90) * Math.PI / 180; // -90 to start from top
-  const radius = 120;
-  const x = Math.cos(angleRad) * radius + 180;
-  const y = Math.sin(angleRad) * radius + 180;
-  
-  label.style.left = x + 'px';
-  label.style.top = y + 'px';
-  label.style.transform = 'translate(-50%, -50%)';
-  
-  segmentLabels.appendChild(label);
+// Initialize the application
+function initializeApp() {
+  updateWheelLabels();
+  buildFruitTable();
+  updateMessage();
 }
 
-// UI buttons
-const btnContainer = document.getElementById('buttons');
-names.forEach(name => {
-  const b = document.createElement('button');
-  b.textContent = `→ ${name}`;
-  b.dataset.name = name;
-  b.addEventListener('click', () => spinToColor(name));
-  btnContainer.appendChild(b);
-});
-
-const message = document.getElementById('message');
-const centerLabel = document.getElementById('centerLabel');
-const debugDiv = document.getElementById('debug');
-let currentRotation = 0;
-let spinning = false;
-
-// Make center clickable for random spin
-centerLabel.addEventListener('click', () => {
-  if (spinning) return;
-  const randomIndex = Math.floor(Math.random() * segments);
-  spinToColor(names[randomIndex]);
-});
-
-// Add debug toggle
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'd') {
-    debugDiv.style.display = debugDiv.style.display === 'none' ? 'block' : 'none';
+// Update wheel segment labels
+function updateWheelLabels() {
+  const segmentLabels = document.getElementById('segmentLabels');
+  segmentLabels.innerHTML = '';
+  
+  for (let i = 0; i < segments; i++) {
+    const label = document.createElement('div');
+    label.className = 'segment-label';
+    label.textContent = fruitNames[i];
+    
+    // Position label at the center of each segment
+    const centerAngle = i * segmentAngle + segmentAngle / 2;
+    const angleRad = (centerAngle - 90) * Math.PI / 180; // -90 to start from top
+    const radius = 120;
+    const x = Math.cos(angleRad) * radius + 180;
+    const y = Math.sin(angleRad) * radius + 180;
+    
+    label.style.left = x + 'px';
+    label.style.top = y + 'px';
+    label.style.transform = 'translate(-50%, -50%)';
+    
+    segmentLabels.appendChild(label);
   }
-});
+}
 
-function findIndexByColor(input){
-  const s = String(input).toLowerCase();
-  const idxName = names.map(n => n.toLowerCase()).indexOf(s);
-  if (idxName >= 0) return idxName;
-  const idxHex = colors.map(c=>c.toLowerCase()).indexOf(s);
-  if (idxHex >= 0) return idxHex;
-  return -1;
+// Build fruit table
+function buildFruitTable() {
+  const tbody = document.getElementById('fruitTableBody');
+  tbody.innerHTML = '';
+  
+  fruitNames.forEach((fruit, index) => {
+    const row = document.createElement('tr');
+    
+    // Checkbox cell
+    const checkboxCell = document.createElement('td');
+    checkboxCell.className = 'checkbox-cell';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'radio';
+    checkbox.name = 'selectedFruit';
+    checkbox.value = index;
+    checkbox.className = 'fruit-checkbox';
+    checkbox.checked = index === selectedFruitIndex;
+    checkbox.addEventListener('change', () => selectFruit(index));
+    checkboxCell.appendChild(checkbox);
+    
+    // Fruit name cell
+    const nameCell = document.createElement('td');
+    nameCell.textContent = fruit;
+    
+    // Color cell
+    const colorCell = document.createElement('td');
+    const colorSample = document.createElement('span');
+    colorSample.className = 'color-sample';
+    colorSample.style.backgroundColor = colors[index];
+    colorCell.appendChild(colorSample);
+    
+    row.appendChild(checkboxCell);
+    row.appendChild(nameCell);
+    row.appendChild(colorCell);
+    tbody.appendChild(row);
+  });
+}
+
+// Handle fruit selection
+function selectFruit(index) {
+  selectedFruitIndex = index;
+  updateMessage();
+  updateSelectionInfo();
+  
+  // Update wheel labels immediately when selection changes
+  updateWheelLabels();
+}
+
+// Update selection info
+function updateSelectionInfo() {
+  const info = document.getElementById('selectionInfo');
+  info.textContent = `Selected: ${fruitNames[selectedFruitIndex]} - The wheel will stop here!`;
+}
+
+// Update message based on current state and page
+function updateMessage() {
+  const message = document.getElementById('message');
+  if (spinning) {
+    message.textContent = 'Spinning...';
+  } else if (selectedFruitIndex >= 0) {
+    message.textContent = `Ready to spin to: ${fruitNames[selectedFruitIndex]}!`;
+  } else {
+    message.textContent = 'Select a fruit in the table, then start spinning!';
+  }
+}
+
+// Page switching
+function switchPage(page) {
+  if (spinning && page === 'table') {
+    return; // Don't allow switching to table during spin
+  }
+  
+  currentPage = page;
+  
+  // Update tab states
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  document.getElementById(`tab-${page}`).classList.add('active');
+  
+  // Update page visibility
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+  });
+  document.getElementById(`page-${page}`).classList.add('active');
+  
+  if (page === 'table') {
+    updateSelectionInfo();
+  }
+}
+
+// Disable/enable table access
+function setTableAccess(enabled) {
+  const tableTab = document.getElementById('tab-table');
+  tableTab.disabled = !enabled;
+  
+  if (!enabled && currentPage === 'table') {
+    switchPage('wheel');
+  }
+}
+
+// Start spinning
+function startSpin() {
+  if (spinning) return;
+  
+  if (selectedFruitIndex < 0) {
+    alert('Please select a fruit from the table first!');
+    switchPage('table');
+    return;
+  }
+  
+  spinToFruit(selectedFruitIndex);
+}
+
+// Get which segment the pointer is currently pointing at
+function getCurrentSegment() {
+  const normalizedRotation = ((currentRotation % 360) + 360) % 360;
+  const target = (360 - normalizedRotation + 360) % 360;
+  const segmentAtPointer = Math.floor(target / segmentAngle) % segments;
+  return segmentAtPointer;
+}
+
+// Spin to specific fruit
+function spinToFruit(targetIndex) {
+  if (spinning) return;
+  
+  spinning = true;
+  setTableAccess(false); // Disable table access during spin
+  updateMessage();
+  
+  const centerLabel = document.getElementById('centerLabel');
+  const startButton = document.getElementById('startButton');
+  
+  centerLabel.textContent = '...';
+  startButton.disabled = true;
+  
+  // Calculate exact rotation to align target segment center with pointer
+  const targetCenter = targetIndex * segmentAngle + (segmentAngle / 2);
+  const desiredRotation = (360 - targetCenter) % 360;
+  const currentMod = ((currentRotation % 360) + 360) % 360;
+  let rotationNeeded = (desiredRotation - currentMod + 360) % 360;
+  
+  // Add extra spins for visual effect
+  const extraSpins = 3 + Math.floor(Math.random() * 3);
+  const totalRotation = rotationNeeded + (extraSpins * 360);
+  const finalRotation = currentRotation + totalRotation;
+  
+  console.log(`🎯 Target: ${fruitNames[targetIndex]} (index ${targetIndex})`);
+  console.log(`🔄 Rotation: ${rotationNeeded}° + ${extraSpins * 360}° = ${totalRotation}°`);
+  
+  // Animate to target
+  animateRotation(currentRotation, finalRotation, 3500).then(() => {
+    currentRotation = finalRotation;
+    const landedSegment = getCurrentSegment();
+    
+    spinning = false;
+    setTableAccess(true); // Re-enable table access
+    startButton.disabled = false;
+    
+    centerLabel.textContent = fruitNames[landedSegment];
+    
+    const message = document.getElementById('message');
+    message.textContent = `🎉 Landed on: ${fruitNames[landedSegment]}!`;
+    
+    if (landedSegment === targetIndex) {
+      console.log(`✅ SUCCESS! Perfect landing on ${fruitNames[landedSegment]}`);
+    } else {
+      console.warn(`❌ MISMATCH! Expected ${fruitNames[targetIndex]}, got ${fruitNames[landedSegment]}`);
+    }
+  });
 }
 
 function easeOutCubic(t){ 
   return 1 - Math.pow(1 - t, 3); 
 }
 
-function disableButtons(disabled){
-  btnContainer.querySelectorAll('button').forEach(b => b.disabled = disabled);
-}
-
-// Get which segment the pointer is currently pointing at
-function getCurrentSegment() {
-  // Normalize current rotation to 0-360
-  const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-  
-  // After rotating the wheel by normalizedRotation degrees clockwise,
-  // we want to know which segment is now at the pointer (0° position)
-  
-  const target = (360 - normalizedRotation + 360) % 360;
-  const segmentAtPointer = Math.floor(target / segmentAngle) % segments;
-  
-  return segmentAtPointer;
-}
-
-function updateDebug() {
-  const current = getCurrentSegment();
-  const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-  debugDiv.innerHTML = `
-    Current Rotation: ${currentRotation.toFixed(1)}° (${normalizedRotation.toFixed(1)}°)
-    Current Segment: ${current} (${names[current]})
-    Segment Angle: ${segmentAngle}°
-  `;
-}
-
-function spinToColor(colorOrName){
-  if (spinning) return;
-  
-  const targetIndex = findIndexByColor(colorOrName);
-  if (targetIndex === -1){ 
-    message.textContent = 'Unknown color. Use: ' + names.join(', '); 
-    return; 
-  }
-
-  spinning = true;
-  disableButtons(true);
-  message.textContent = 'Spinning...';
-  centerLabel.textContent = '...';
-
-  // PRECISE APPROACH: Calculate exact rotation to align target segment center with pointer
-  
-  // Target segment center position (in degrees from 0)
-  const targetCenter = targetIndex * segmentAngle + (segmentAngle / 2);
-  
-  // Desired final rotation mod 360
-  const desiredRotation = (360 - targetCenter) % 360;
-  
-  // Current mod
-  const currentMod = ((currentRotation % 360) + 360) % 360;
-  
-  // Rotation needed to reach desired from current
-  let rotationNeeded = (desiredRotation - currentMod + 360) % 360;
-  
-  // Add extra spins for visual effect
-  const extraSpins = 3 + Math.floor(Math.random() * 3);
-  const totalRotation = rotationNeeded + (extraSpins * 360);
-  
-  const finalRotation = currentRotation + totalRotation;
-  
-  console.log(`🎯 Target: ${names[targetIndex]} (index ${targetIndex})`);
-  console.log(`📐 Target center: ${targetCenter}°`);
-  console.log(`🔄 Rotation: ${rotationNeeded}° + ${extraSpins * 360}° = ${totalRotation}°`);
-  console.log(`📍 Final rotation: ${finalRotation}° (mod 360 = ${((finalRotation % 360) + 360) % 360}°)`);
-  
-  // Animate to target
-  animateRotation(currentRotation, finalRotation, 3500).then(() => {
-    currentRotation = finalRotation;
-    
-    // Verify result with precise calculation
-    const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-    const landedSegment = getCurrentSegment();
-    
-    spinning = false;
-    disableButtons(false);
-    centerLabel.textContent = names[landedSegment];
-    message.textContent = `🎉 Landed on: ${names[landedSegment]}!`;
-    
-    updateDebug();
-    
-    // Detailed verification
-    console.log(`🔍 Verification:`);
-    console.log(`   Final rotation: ${normalizedRotation}°`);
-    console.log(`   Expected target center at 0°: ${targetCenter}° -> should be at ${(targetCenter + normalizedRotation) % 360}°`);
-    console.log(`   Landed segment: ${landedSegment} (${names[landedSegment]})`);
-    
-    if (landedSegment !== targetIndex) {
-      console.warn(`❌ MISMATCH! Expected ${names[targetIndex]} (${targetIndex}), got ${names[landedSegment]} (${landedSegment})`);
-      
-      // Calculate where target center actually ended up
-      const actualCenterPosition = (targetCenter + normalizedRotation) % 360;
-      console.log(`❌ Target center ended up at ${actualCenterPosition}° instead of 0°`);
-    } else {
-      console.log(`✅ SUCCESS! Perfect landing on ${names[landedSegment]}`);
-    }
-  });
-}
-
 function animateRotation(startRotation, endRotation, duration = 3500) {
   return new Promise((resolve) => {
     const startTime = performance.now();
     const rotationDelta = endRotation - startRotation;
+    const segmentLabels = document.getElementById('segmentLabels');
     
     function animate(currentTime) {
       const elapsed = currentTime - startTime;
@@ -342,14 +556,12 @@ function animateRotation(startRotation, endRotation, duration = 3500) {
       wheel.style.transform = `rotate(${currentRot}deg)`;
       segmentLabels.style.transform = `rotate(${currentRot}deg)`;
       
-      // Update current rotation for real-time calculation
       currentRotation = currentRot;
-      updateDebug();
       
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        currentRotation = endRotation; // Ensure exact final value
+        currentRotation = endRotation;
         wheel.style.transform = `rotate(${endRotation}deg)`;
         segmentLabels.style.transform = `rotate(${endRotation}deg)`;
         resolve();
@@ -360,78 +572,34 @@ function animateRotation(startRotation, endRotation, duration = 3500) {
   });
 }
 
-// Initialize
-updateDebug();
+// Make center clickable for random spin
+document.getElementById('centerLabel').addEventListener('click', () => {
+  if (spinning) return;
+  const randomIndex = Math.floor(Math.random() * segments);
+  selectedFruitIndex = randomIndex;
+  
+  // Update table selection
+  const radioButtons = document.querySelectorAll('input[name="selectedFruit"]');
+  radioButtons.forEach((radio, index) => {
+    radio.checked = index === randomIndex;
+  });
+  
+  updateSelectionInfo();
+  spinToFruit(randomIndex);
+});
 
-// Expose for testing
-window.spinToColor = spinToColor;
-window.getCurrentSegment = getCurrentSegment;
-window.testAccuracy = function(iterations = 10) {
-  console.log(`🧪 Testing accuracy with ${iterations} iterations...`);
-  
-  // Reset to clean state
-  currentRotation = 0;
-  wheel.style.transform = 'rotate(0deg)';
-  segmentLabels.style.transform = 'rotate(0deg)';
-  
-  let correct = 0;
-  
-  for (let i = 0; i < iterations; i++) {
-    const targetIndex = Math.floor(Math.random() * segments);
-    const targetName = names[targetIndex];
-    const targetCenter = targetIndex * segmentAngle + (segmentAngle / 2);
-    
-    console.log(`\n--- Test ${i+1}: ${targetName} (index ${targetIndex}) ---`);
-    console.log(`Target center: ${targetCenter}°`);
-    
-    // Use exact same calculation as spinToColor
-    const desiredRotation = (360 - targetCenter) % 360;
-    const currentMod = ((currentRotation % 360) + 360) % 360;
-    let rotationNeeded = (desiredRotation - currentMod + 360) % 360;
-    const extraSpins = 4; // Fixed for testing
-    const totalRotation = rotationNeeded + (extraSpins * 360);
-    const finalRotation = currentRotation + totalRotation;
-    
-    console.log(`Rotation: ${rotationNeeded}° + ${extraSpins * 360}° = ${totalRotation}°`);
-    console.log(`Final absolute: ${finalRotation}°`);
-    
-    // Update rotation and test
-    currentRotation = finalRotation;
-    const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-    console.log(`Normalized: ${normalizedRotation}°`);
-    
-    // Verify where target center ended up
-    const actualCenterPos = (targetCenter + normalizedRotation) % 360;
-    console.log(`Target center now at: ${actualCenterPos}° (should be 0°)`);
-    
-    const landedSegment = getCurrentSegment();
-    console.log(`Landed on: ${names[landedSegment]} (index ${landedSegment})`);
-    
-    if (landedSegment === targetIndex) {
-      correct++;
-      console.log(`✅ CORRECT`);
-    } else {
-      console.log(`❌ WRONG`);
-      
-      // Debug the getCurrentSegment calculation
-      const target = (360 - normalizedRotation + 360) % 360;
-      console.log(`getCurrentSegment debug: target=${target}°, segment=${Math.floor(target / segmentAngle)}`);
-    }
+// Debug toggle
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'd') {
+    const debugDiv = document.getElementById('debug');
+    debugDiv.style.display = debugDiv.style.display === 'none' ? 'block' : 'none';
   }
-  
-  console.log(`\n📊 Result: ${correct}/${iterations} (${(correct/iterations*100).toFixed(1)}%)`);
-  
-  // Reset
-  currentRotation = 0;
-  wheel.style.transform = 'rotate(0deg)';
-  segmentLabels.style.transform = 'rotate(0deg)';
-  updateDebug();
-  
-  return correct / iterations;
-};
+});
 
-console.log('🎯 Spinning Wheel Loaded! Press "d" to toggle debug info');
-console.log('🧪 Run testAccuracy() to test the precision');
+// Initialize the application
+initializeApp();
+
+console.log('🍎 Fruit Wheel Loaded! Press "d" to toggle debug info');
 </script>
 
 </body>
