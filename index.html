@@ -1,4 +1,4 @@
-//V12
+<!-- V12 -->
 <!doctype html>
 <html>
 <head>
@@ -190,7 +190,6 @@
 </div>
 
 <div id="debug" class="debug"></div>
-
 <script>
 // === CONFIG ===
 const colors = ['#e63946','#f77f00','#ffbe0b','#8ac926','#2ec4b6','#4361ee','#9d4edd','#ff6fbf'];
@@ -198,7 +197,7 @@ let names  = ['Strawberry','Orange','Banana','Lime','Blueberry','Plum','Raspberr
 const segments = colors.length;
 const segmentAngle = 360 / segments; // 45 degrees per segment
 
-// Build the wheel - each segment starts at index * 45 degrees
+//Build the wheel - each segment starts at index * 45 degrees
 // Segment 0 (Red): 0° to 45°, Segment 1 (Orange): 45° to 90°, etc.
 const stops = [];
 for (let i = 0; i < segments; i++){
