@@ -1,273 +1,437 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Lucky Wheel with Numbers</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-    }
-
-    .wheel-container {
-      position: relative;
-      width: 300px;
-      height: 300px;
-      margin: auto;
-    }
-
-    .wheel {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 5px solid #333;
-      background: conic-gradient(
-        #fff 0deg 30deg,
-        #e74c3c 30deg 60deg,     /* Item 1 */
-        #fff 60deg 90deg,
-        #3498db 90deg 120deg,    /* Item 02 */
-        #fff 120deg 150deg,
-        #2ecc71 150deg 180deg,   /* Item 3 */
-        #fff 180deg 210deg,
-        #f1c40f 210deg 240deg,   /* Item 4 */
-        #fff 240deg 270deg,
-        #9b59b6 270deg 300deg,   /* Item 5 */
-        #fff 300deg 330deg,
-        #e67e22 330deg 360deg    /* Item 6 */
-      );
-      transition: transform 2s ease-out;
-      transform: rotate(0deg);
-      position: relative;
-    }
-
-    .arrow {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 25px solid #000;
-      z-index: 10;
-    }
-
-    .label {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      transform: rotate(0deg);
-    }
-
-    .label span {
-      position: absolute;
-      transform-origin: center;
-      font-weight: bold;
-      font-size: 18px;
-      color: #000;
-    }
-
-    button {
-      padding: 0.5rem 1.2rem;
-      margin-top: 1rem;
-      font-weight: bold;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 90%;
-      margin: 2rem auto;
-    }
-
-    th, td {
-      border: 1px solid #aaa;
-      padding: 0.5rem;
-    }
-
-    th {
-      background-color: #f2f2f2;
-    }
-  </style>
+<meta charset="utf-8" />
+<title>8-Segment Controlled Spinning Wheel (Perfect Accuracy)</title>
+<style>
+  :root { --size: 360px; }
+  body { 
+    height:100vh; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    flex-direction:column; 
+    gap:18px; 
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family:system-ui,Segoe UI,Roboto,Arial; 
+    color: white;
+  }
+  .wheel-wrap { 
+    position: relative; 
+    width: var(--size); 
+    height: var(--size); 
+  }
+  .wheel { 
+    width:100%; 
+    height:100%; 
+    border-radius:50%; 
+    border:8px solid #fff; 
+    box-shadow:0 15px 35px rgba(0,0,0,0.3), 0 5px 15px rgba(0,0,0,0.2); 
+    transform:rotate(0deg);
+    transition: none;
+  }
+  .pointer { 
+    position:absolute; 
+    left:50%; 
+    top:-25px; 
+    transform:translateX(-50%); 
+    width:0; 
+    height:0; 
+    border-left:20px solid transparent; 
+    border-right:20px solid transparent; 
+    border-bottom:40px solid #fff; 
+    z-index:20;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+  }
+  .center { 
+    position:absolute; 
+    width:80px; 
+    height:80px; 
+    border-radius:50%; 
+    background: linear-gradient(45deg, #fff, #f0f0f0); 
+    top:calc(50% - 40px); 
+    left:calc(50% - 40px); 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    font-weight:700; 
+    border:6px solid #fff; 
+    z-index:15;
+    color: #333;
+    font-size: 14px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+  .controls { 
+    display:flex; 
+    gap:10px; 
+    flex-wrap:wrap; 
+    justify-content:center; 
+    max-width: 600px;
+  }
+  button { 
+    padding:10px 16px; 
+    border-radius:8px; 
+    border:2px solid rgba(255,255,255,0.3); 
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    cursor:pointer; 
+    color: white;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  button:hover:not(:disabled) {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+  }
+  button:disabled { 
+    opacity:.5; 
+    cursor:default; 
+    transform: none;
+  }
+  #message { 
+    color:#fff; 
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    min-height: 25px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .segment-labels {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+    transition: none;
+  }
+  .segment-label {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    transform-origin: center;
+  }
+  .debug {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 100;
+    display: none;
+  }
+</style>
 </head>
 <body>
 
-  <h2>🎯 Lucky Wheel</h2>
+<div class="wheel-wrap">
+  <div class="pointer" aria-hidden="true"></div>
+  <div id="wheel" class="wheel" role="img" aria-label="Prize wheel"></div>
+  <div class="segment-labels" id="segmentLabels"></div>
+  <div class="center" id="centerLabel">SPIN</div>
+</div>
 
-  <div class="wheel-container">
-    <div class="arrow"></div>
-    <div class="wheel" id="wheel">
-      <div class="label">
-        <span style="top: 50%; left: 50%; transform: rotate(45deg) translateY(-130px) translateX(-50%);">1</span>
-        <span style="top: 50%; left: 50%; transform: rotate(105deg) translateY(-130px) translateX(-50%);">2</span>
-        <span style="top: 50%; left: 50%; transform: rotate(165deg) translateY(-130px) translateX(-50%);">3</span>
-        <span style="top: 50%; left: 50%; transform: rotate(225deg) translateY(-130px) translateX(-50%);">4</span>
-        <span style="top: 50%; left: 50%; transform: rotate(285deg) translateY(-130px) translateX(-50%);">5</span>
-        <span style="top: 50%; left: 50%; transform: rotate(345deg) translateY(-130px) translateX(-50%);">6</span>
-      </div>
-    </div>
-  </div>
+<div class="controls" id="buttons"></div>
+<div id="message">Click any button to spin to that color!</div>
+<div id="debug" class="debug"></div>
 
-  <button id="spinBtn">SPIN</button>
+<script>
+// === CONFIG ===
+const colors = ['#e63946','#f77f00','#ffbe0b','#8ac926','#2ec4b6','#4361ee','#9d4edd','#ff6fbf'];
+const names  = ['Red','Orange','Yellow','Green','Cyan','Blue','Purple','Pink'];
+const segments = colors.length;
+const segmentAngle = 360 / segments; // 45 degrees per segment
 
-  <div style="margin: 1rem 0;">
-    <label>Target Number:
-      <input type="number" id="targetNumber" min="1" max="6" value="1" style="width: 3em;">
-    </label>
-    <label style="margin-left:1em;">Spin Count:
-      <input type="number" id="spinCount" min="1" max="10" value="3" style="width: 3em;">
-    </label>
-  </div>
+// Build the wheel - each segment starts at index * 45 degrees
+// Segment 0 (Red): 0° to 45°, Segment 1 (Orange): 45° to 90°, etc.
+const stops = [];
+for (let i = 0; i < segments; i++){
+  const start = i * segmentAngle;
+  const end = start + segmentAngle;
+  stops.push(`${colors[i]} ${start}deg ${end}deg`);
+}
 
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th><th>Name</th><th>Price</th><th>Qty</th><th>Times Won</th><th>Revenue</th>
-      </tr>
-    </thead>
-    <tbody id="itemsTable"></tbody>
-  </table>
+const wheel = document.getElementById('wheel');
+wheel.style.background = `conic-gradient(from 0deg, ${stops.join(', ')})`;
 
-  <script>
-  const items = [
-    { id: 1, name: 'Hole Grill Pan', price: 1050, qty: 1, won: 0, revenue: 0 },
-    { id: 2, name: 'Knife Set', price: 670, qty: 1, won: 0, revenue: 0 },
-    { id: 3, name: 'Waffles Maker', price: 1300, qty: 1, won: 0, revenue: 0 },
-    { id: 4, name: 'Organizer', price: 730, qty: 1, won: 0, revenue: 0 },
-    { id: 5, name: 'Travel Mug', price: 650, qty: 1, won: 0, revenue: 0 },
-    { id: 6, name: 'Sharpener', price: 190, qty: 3, won: 0, revenue: 0 }
-  ];
+// Add segment labels
+const segmentLabels = document.getElementById('segmentLabels');
+for (let i = 0; i < segments; i++) {
+  const label = document.createElement('div');
+  label.className = 'segment-label';
+  label.textContent = names[i];
+  
+  // Position label at the center of each segment
+  const centerAngle = i * segmentAngle + segmentAngle / 2;
+  const angleRad = (centerAngle - 90) * Math.PI / 180; // -90 to start from top
+  const radius = 120;
+  const x = Math.cos(angleRad) * radius + 180;
+  const y = Math.sin(angleRad) * radius + 180;
+  
+  label.style.left = x + 'px';
+  label.style.top = y + 'px';
+  label.style.transform = 'translate(-50%, -50%)';
+  
+  segmentLabels.appendChild(label);
+}
 
-  const wheel = document.getElementById('wheel');
-  const spinBtn = document.getElementById('spinBtn');
-  const tableBody = document.getElementById('itemsTable');
-  const sliceCount = 12;
-  const sliceAngle = 360 / sliceCount;
-  const itemIndexes = [1,3,5,7,9,11]; // Even slices are blanks
+// UI buttons
+const btnContainer = document.getElementById('buttons');
+names.forEach(name => {
+  const b = document.createElement('button');
+  b.textContent = `→ ${name}`;
+  b.dataset.name = name;
+  b.addEventListener('click', () => spinToColor(name));
+  btnContainer.appendChild(b);
+});
 
-  function renderTable() {
-    tableBody.innerHTML = '';
-    items.forEach(item => {
-      tableBody.innerHTML += `
-        <tr>
-          <td>${item.id}</td>
-          <td>${item.name}</td>
-          <td>₹${item.price}</td>
-          <td>${item.qty}</td>
-          <td>${item.won}</td>
-          <td>₹${item.revenue}</td>
-        </tr>
-      `;
-    });
-    spinBtn.disabled = items.every(item => item.qty === 0);
+const message = document.getElementById('message');
+const centerLabel = document.getElementById('centerLabel');
+const debugDiv = document.getElementById('debug');
+let currentRotation = 0;
+let spinning = false;
+
+// Make center clickable for random spin
+centerLabel.addEventListener('click', () => {
+  if (spinning) return;
+  const randomIndex = Math.floor(Math.random() * segments);
+  spinToColor(names[randomIndex]);
+});
+
+// Add debug toggle
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'd') {
+    debugDiv.style.display = debugDiv.style.display === 'none' ? 'block' : 'none';
+  }
+});
+
+function findIndexByColor(input){
+  const s = String(input).toLowerCase();
+  const idxName = names.map(n => n.toLowerCase()).indexOf(s);
+  if (idxName >= 0) return idxName;
+  const idxHex = colors.map(c=>c.toLowerCase()).indexOf(s);
+  if (idxHex >= 0) return idxHex;
+  return -1;
+}
+
+function easeOutCubic(t){ 
+  return 1 - Math.pow(1 - t, 3); 
+}
+
+function disableButtons(disabled){
+  btnContainer.querySelectorAll('button').forEach(b => b.disabled = disabled);
+}
+
+// Get which segment the pointer is currently pointing at
+function getCurrentSegment() {
+  // Normalize current rotation to 0-360
+  const normalizedRotation = ((currentRotation % 360) + 360) % 360;
+  
+  // After rotating the wheel by normalizedRotation degrees clockwise,
+  // we want to know which segment is now at the pointer (0° position)
+  
+  const target = (360 - normalizedRotation + 360) % 360;
+  const segmentAtPointer = Math.floor(target / segmentAngle) % segments;
+  
+  return segmentAtPointer;
+}
+
+function updateDebug() {
+  const current = getCurrentSegment();
+  const normalizedRotation = ((currentRotation % 360) + 360) % 360;
+  debugDiv.innerHTML = `
+    Current Rotation: ${currentRotation.toFixed(1)}° (${normalizedRotation.toFixed(1)}°)
+    Current Segment: ${current} (${names[current]})
+    Segment Angle: ${segmentAngle}°
+  `;
+}
+
+function spinToColor(colorOrName){
+  if (spinning) return;
+  
+  const targetIndex = findIndexByColor(colorOrName);
+  if (targetIndex === -1){ 
+    message.textContent = 'Unknown color. Use: ' + names.join(', '); 
+    return; 
   }
 
-  function pickItem() {
-    const available = items.filter(i => i.qty > 0);
-    if (available.length === 0) return null;
-    return available[Math.floor(Math.random() * available.length)];
-  }
+  spinning = true;
+  disableButtons(true);
+  message.textContent = 'Spinning...';
+  centerLabel.textContent = '...';
 
-
-  // State for multi-spin
-  let multiSpinState = null;
-  let accumulatedRotation = 0;
-
-  spinBtn.addEventListener('click', () => {
-    if (spinBtn.disabled) return;
-
-    // If not in a multi-spin session, initialize
-    if (!multiSpinState) {
-      accumulatedRotation = 0;
-      const targetNum = parseInt(document.getElementById('targetNumber').value, 10);
-      const spinTimes = parseInt(document.getElementById('spinCount').value, 10);
-      if (isNaN(targetNum) || targetNum < 1 || targetNum > 6) {
-        alert('Please enter a valid target number (1-6).');
-        return;
-      }
-      if (isNaN(spinTimes) || spinTimes < 1) {
-        alert('Please enter a valid spin count (>=1).');
-        return;
-      }
-      const selected = items[targetNum - 1];
-      if (!selected || selected.qty === 0) {
-        alert('Selected item is not available!');
-        return;
-      }
-      multiSpinState = {
-        targetNum,
-        spinTimes,
-        currentSpin: 1,
-        selected
-      };
-      // Optionally, disable inputs during session
-      document.getElementById('targetNumber').disabled = true;
-      document.getElementById('spinCount').disabled = true;
-    }
-
-    const { targetNum, spinTimes, selected } = multiSpinState;
-    let { currentSpin } = multiSpinState;
-    spinBtn.disabled = true;
-
-    // Reset wheel rotation for each spin
-    wheel.style.transition = 'none';
-    wheel.style.transform = `rotate(${accumulatedRotation}deg)`;
-    void wheel.offsetWidth;
-    wheel.style.transition = 'transform 2s ease-out';
-
-    let targetIndex;
-    if (currentSpin < spinTimes) {
-      // Pick a random index that is NOT the target
-      const notTargetIndexes = itemIndexes.filter((idx, i) => i !== (targetNum - 1) && items[i].qty > 0);
-      if (notTargetIndexes.length === 0) {
-        // If all other items are out, just spin to a blank
-        targetIndex = (itemIndexes[(targetNum) % 6] + 2) % 12;
-      } else {
-        targetIndex = notTargetIndexes[Math.floor(Math.random() * notTargetIndexes.length)];
-      }
+  // PRECISE APPROACH: Calculate exact rotation to align target segment center with pointer
+  
+  // Target segment center position (in degrees from 0)
+  const targetCenter = targetIndex * segmentAngle + (segmentAngle / 2);
+  
+  // Desired final rotation mod 360
+  const desiredRotation = (360 - targetCenter) % 360;
+  
+  // Current mod
+  const currentMod = ((currentRotation % 360) + 360) % 360;
+  
+  // Rotation needed to reach desired from current
+  let rotationNeeded = (desiredRotation - currentMod + 360) % 360;
+  
+  // Add extra spins for visual effect
+  const extraSpins = 3 + Math.floor(Math.random() * 3);
+  const totalRotation = rotationNeeded + (extraSpins * 360);
+  
+  const finalRotation = currentRotation + totalRotation;
+  
+  console.log(`🎯 Target: ${names[targetIndex]} (index ${targetIndex})`);
+  console.log(`📐 Target center: ${targetCenter}°`);
+  console.log(`🔄 Rotation: ${rotationNeeded}° + ${extraSpins * 360}° = ${totalRotation}°`);
+  console.log(`📍 Final rotation: ${finalRotation}° (mod 360 = ${((finalRotation % 360) + 360) % 360}°)`);
+  
+  // Animate to target
+  animateRotation(currentRotation, finalRotation, 3500).then(() => {
+    currentRotation = finalRotation;
+    
+    // Verify result with precise calculation
+    const normalizedRotation = ((currentRotation % 360) + 360) % 360;
+    const landedSegment = getCurrentSegment();
+    
+    spinning = false;
+    disableButtons(false);
+    centerLabel.textContent = names[landedSegment];
+    message.textContent = `🎉 Landed on: ${names[landedSegment]}!`;
+    
+    updateDebug();
+    
+    // Detailed verification
+    console.log(`🔍 Verification:`);
+    console.log(`   Final rotation: ${normalizedRotation}°`);
+    console.log(`   Expected target center at 0°: ${targetCenter}° -> should be at ${(targetCenter + normalizedRotation) % 360}°`);
+    console.log(`   Landed segment: ${landedSegment} (${names[landedSegment]})`);
+    
+    if (landedSegment !== targetIndex) {
+      console.warn(`❌ MISMATCH! Expected ${names[targetIndex]} (${targetIndex}), got ${names[landedSegment]} (${landedSegment})`);
+      
+      // Calculate where target center actually ended up
+      const actualCenterPosition = (targetCenter + normalizedRotation) % 360;
+      console.log(`❌ Target center ended up at ${actualCenterPosition}° instead of 0°`);
     } else {
-      // Last spin: land on the target
-      targetIndex = itemIndexes[targetNum - 1];
+      console.log(`✅ SUCCESS! Perfect landing on ${names[landedSegment]}`);
     }
-    // Use a fixed spin count for animation
-    const spins = 3;
-    const spinAngle = spins * 360 + targetIndex * sliceAngle + sliceAngle / 2;
-    accumulatedRotation += spinAngle;
-    wheel.style.transform = `rotate(${accumulatedRotation}deg)`;
-
-    setTimeout(() => {
-      if (currentSpin < spinTimes) {
-        multiSpinState.currentSpin++;
-        spinBtn.disabled = false;
-        if (multiSpinState.currentSpin === spinTimes) {
-          spinBtn.textContent = 'FINAL SPIN';
-        } else {
-          spinBtn.textContent = `SPIN (${multiSpinState.currentSpin}/${spinTimes})`;
-        }
-      } else {
-        // Only update stats on the last spin
-        selected.qty--;
-        selected.won++;
-        selected.revenue += Math.ceil((selected.price + 200) / 100) * 100;
-        alert(`🎉 You won: ${selected.name}\nCollected: ₹${Math.ceil((selected.price + 200) / 100) * 100}\nProfit: ₹${Math.ceil((selected.price + 200) / 100) * 100 - selected.price}`);
-        renderTable();
-        spinBtn.disabled = items.every(item => item.qty === 0);
-        spinBtn.textContent = 'SPIN';
-        document.getElementById('targetNumber').disabled = false;
-        document.getElementById('spinCount').disabled = false;
-        multiSpinState = null;
-        accumulatedRotation = 0;
-      }
-    }, 2000);
   });
+}
 
-  renderTable();
-  </script>
+function animateRotation(startRotation, endRotation, duration = 3500) {
+  return new Promise((resolve) => {
+    const startTime = performance.now();
+    const rotationDelta = endRotation - startRotation;
+    
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeOutCubic(progress);
+      
+      const currentRot = startRotation + (rotationDelta * easedProgress);
+      wheel.style.transform = `rotate(${currentRot}deg)`;
+      segmentLabels.style.transform = `rotate(${currentRot}deg)`;
+      
+      // Update current rotation for real-time calculation
+      currentRotation = currentRot;
+      updateDebug();
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        currentRotation = endRotation; // Ensure exact final value
+        wheel.style.transform = `rotate(${endRotation}deg)`;
+        segmentLabels.style.transform = `rotate(${endRotation}deg)`;
+        resolve();
+      }
+    }
+    
+    requestAnimationFrame(animate);
+  });
+}
+
+// Initialize
+updateDebug();
+
+// Expose for testing
+window.spinToColor = spinToColor;
+window.getCurrentSegment = getCurrentSegment;
+window.testAccuracy = function(iterations = 10) {
+  console.log(`🧪 Testing accuracy with ${iterations} iterations...`);
+  
+  // Reset to clean state
+  currentRotation = 0;
+  wheel.style.transform = 'rotate(0deg)';
+  segmentLabels.style.transform = 'rotate(0deg)';
+  
+  let correct = 0;
+  
+  for (let i = 0; i < iterations; i++) {
+    const targetIndex = Math.floor(Math.random() * segments);
+    const targetName = names[targetIndex];
+    const targetCenter = targetIndex * segmentAngle + (segmentAngle / 2);
+    
+    console.log(`\n--- Test ${i+1}: ${targetName} (index ${targetIndex}) ---`);
+    console.log(`Target center: ${targetCenter}°`);
+    
+    // Use exact same calculation as spinToColor
+    const desiredRotation = (360 - targetCenter) % 360;
+    const currentMod = ((currentRotation % 360) + 360) % 360;
+    let rotationNeeded = (desiredRotation - currentMod + 360) % 360;
+    const extraSpins = 4; // Fixed for testing
+    const totalRotation = rotationNeeded + (extraSpins * 360);
+    const finalRotation = currentRotation + totalRotation;
+    
+    console.log(`Rotation: ${rotationNeeded}° + ${extraSpins * 360}° = ${totalRotation}°`);
+    console.log(`Final absolute: ${finalRotation}°`);
+    
+    // Update rotation and test
+    currentRotation = finalRotation;
+    const normalizedRotation = ((currentRotation % 360) + 360) % 360;
+    console.log(`Normalized: ${normalizedRotation}°`);
+    
+    // Verify where target center ended up
+    const actualCenterPos = (targetCenter + normalizedRotation) % 360;
+    console.log(`Target center now at: ${actualCenterPos}° (should be 0°)`);
+    
+    const landedSegment = getCurrentSegment();
+    console.log(`Landed on: ${names[landedSegment]} (index ${landedSegment})`);
+    
+    if (landedSegment === targetIndex) {
+      correct++;
+      console.log(`✅ CORRECT`);
+    } else {
+      console.log(`❌ WRONG`);
+      
+      // Debug the getCurrentSegment calculation
+      const target = (360 - normalizedRotation + 360) % 360;
+      console.log(`getCurrentSegment debug: target=${target}°, segment=${Math.floor(target / segmentAngle)}`);
+    }
+  }
+  
+  console.log(`\n📊 Result: ${correct}/${iterations} (${(correct/iterations*100).toFixed(1)}%)`);
+  
+  // Reset
+  currentRotation = 0;
+  wheel.style.transform = 'rotate(0deg)';
+  segmentLabels.style.transform = 'rotate(0deg)';
+  updateDebug();
+  
+  return correct / iterations;
+};
+
+console.log('🎯 Spinning Wheel Loaded! Press "d" to toggle debug info');
+console.log('🧪 Run testAccuracy() to test the precision');
+</script>
+
 </body>
 </html>
